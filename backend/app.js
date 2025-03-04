@@ -2,6 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const morgan = require('morgan');
+const { errorHandler } = require("./middleware/errorMiddleware");
+
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -26,5 +28,8 @@ app.use('/api/categories', categoryRoutes);
 app.get('/', (req, res) => {
   res.send('Blogify API');
 });
+
+app.use(errorHandler);
+
 
 module.exports = app;
