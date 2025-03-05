@@ -4,12 +4,13 @@ const mongoose = require('mongoose');
  
 exports.createPost = async (req, res) => {
     const { title, content, category } = req.body;
-  
+    const image = req.file ? req.file.path : null; 
     try {
       const newPost = new Post({
         title,
         content,
         category,
+        image,
         user: req.user.id // Link post to the authenticated user
       });
   
