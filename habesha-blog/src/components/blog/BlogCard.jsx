@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Heart, MessageCircle, Bookmark } from 'lucide-react';
+import { format } from 'date-fns';
 
 const BlogCard = ({ post, featured = false }) => {
   const timeAgo = formatDistanceToNow(new Date(post.publishedAt), { addSuffix: true });
