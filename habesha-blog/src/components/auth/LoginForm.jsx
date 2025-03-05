@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
+import axios from 'axios';
 
 const LoginForm = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -17,23 +18,30 @@ const LoginForm = () => {
     setLoginError('');
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsLoading(true); // Set loading to true while making the request
+      setLoginError(''); // Clear any previous login error message
       
-      // Mock successful login - in a real app, this would be an API call
-      // that returns a JWT token
-      const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMzQ1Njc4OTAiLCJ1c2VybmFtZSI6ImpvaG5kb2UiLCJlbWFpbCI6ImpvaG5AZXhhbXBsZS5jb20iLCJleHAiOjE5MTYyMzkwMjJ9.4iN4i4NW_AJjJlg-nlkp_Vj6-naVErnSrBZV-_tXcFM';
-      
-      // Call the login function from AuthContext
-      login(mockToken);
-      
+      // Make the API call to your login endpoint
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email: data.email,  
+        password: data.password
+      });
+    
+      // Assuming the response contains a JWT token
+      const { token } = response.data;
+    
+      // Call the login function from AuthContext to store the token
+      login(token);
+    console.log('Logged in successfully');
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
+      // Handle errors (e.g., invalid credentials, server issues)
       setLoginError('Invalid email or password. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Set loading to false after the request
     }
+    
   };
 
   return (

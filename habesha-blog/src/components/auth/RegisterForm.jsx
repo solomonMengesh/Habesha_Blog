@@ -13,16 +13,16 @@ const RegisterForm = () => {
   const [registerError, setRegisterError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  const password = watch('password');
-
+   const password = watch('password');
+   const API_URL = process.env.REACT_APP_API_URL;
+   
   const onSubmit = async (data) => {
     setIsLoading(true);
     setRegisterError('');
 
     try {
       // API call for user registration
-      const response = await axios.post('/api/register', {
+      const response = await axios.post('http://localhost:5000/api/auth/register', {
         username: data.username,
         email: data.email,
         password: data.password,
