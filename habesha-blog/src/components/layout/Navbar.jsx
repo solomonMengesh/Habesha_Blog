@@ -24,7 +24,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Blogify</span>
+              <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Habesha-Blog</span>
             </Link>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
               <Link to="/" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 border-b-2 border-transparent hover:border-indigo-500">

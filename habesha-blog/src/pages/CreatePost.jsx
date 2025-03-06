@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Image, X } from 'lucide-react';
+import axios from 'axios';  // Add this line to import axios
 
 const CreatePost = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -13,24 +14,32 @@ const CreatePost = () => {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call to create post
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, this would send the data to your backend
-      console.log('Post data:', { ...data, coverImage });
-      
+      // Prepare the data to send to the backend
+      const postData = { 
+        title: data.title, 
+        category: data.category, 
+        content: data.content, 
+        coverImage 
+      };
+
+      // Make the API call to create the post
+      const response = await axios.post('http://localhost:5000/api/posts', postData);
+
+      // If the request is successful, handle the response here
+      console.log('Post created successfully:', response.data);
+
       // Redirect to dashboard after successful creation
       navigate('/dashboard');
     } catch (error) {
       console.error('Error creating post:', error);
+      // Handle the error here (e.g., show an error message)
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleImageChange = (e) => {
     // In a real app, this would upload the image to your server or cloud storage
-    // For this demo, we'll just use a placeholder image
     setCoverImage('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1172&q=80');
   };
   

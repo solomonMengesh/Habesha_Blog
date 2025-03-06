@@ -21,7 +21,8 @@ const LatestPosts = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {latestPosts.map((post) => (
-            <BlogCard key={post.id} post={post} />
+            console.log(post),
+            <BlogCard key={post.id} post={post}  />
           ))}
         </div>
       </div>

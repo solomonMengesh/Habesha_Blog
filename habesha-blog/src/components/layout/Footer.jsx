@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-              Blogify
+            Habesha-Blog
             </Link>
             <p className="mt-4 text-gray-600 dark:text-gray-400">
               A modern blog platform for sharing your thoughts, ideas, and stories with the world.
@@ -91,7 +91,7 @@ const Footer = () => {
         </div>
         <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8">
           <p className="text-base text-gray-500 dark:text-gray-400 text-center">
-            &copy; {new Date().getFullYear()} Blogify. All rights reserved.
+            &copy; {new Date().getFullYear()} Habesha-Blog. All rights reserved.
           </p>
         </div>
       </div>
