@@ -1,33 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import BlogCard from './BlogCard';
-import { mockPosts } from '../../data/mockData';
 
 const FeaturedPosts = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/posts'); // Replace with your API URL
+        setPosts(response.data);
+        setLoading(false);
+      } catch (error) {
+        setError('Failed to fetch posts');
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  // Handle loading state
+  if (loading) return <p>Loading...</p>;
+
+  // Handle error state
+  if (error) return <p>{error}</p>;
+
   // Get the first post as featured
-  const featuredPost = mockPosts[0];
-  
+  const featuredPost = posts[0];
+
   // Get the next 3 posts for the secondary featured section
-  const secondaryFeatured = mockPosts.slice(1, 4);
+  const secondaryFeatured = posts.slice(1, 4);
+
+  // Function to format the date to 'Month Day, Year'
+  const formatDate = (date) => {
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate)) return 'Invalid date';
+    return parsedDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
 
   return (
     <section className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Featured Posts</h2>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <BlogCard post={featuredPost} featured={true} />
           </div>
-          
+
           <div className="space-y-6">
             {secondaryFeatured.map((post) => (
-              <div key={post.id} className="flex items-center space-x-4">
+              <div key={post._id} className="flex items-center space-x-4">
+                {/* Post Image */}
                 <img 
-                  src={post.coverImage} 
+                  src={`http://localhost:5000/${post.coverImage || '/default-image.jpg'}`} 
                   alt={post.title} 
                   className="w-24 h-24 rounded-lg object-cover"
                 />
+
                 <div>
+                  {/* Post Category */}
                   <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                     {post.category}
                   </span>
@@ -36,13 +75,16 @@ const FeaturedPosts = () => {
                       {post.title}
                     </a>
                   </h3>
+                  {/* Post Date */}
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
+                    {formatDate(post.createdAt)} {/* Format and display the post date */}
                   </p>
+                  {/* Author Name */}
+                  {post.user && post.user.username && (
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                      By {post.user.username} {/* Display username */}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

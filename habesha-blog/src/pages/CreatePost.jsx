@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Image, X } from 'lucide-react';
-import axios from 'axios';  // Add this line to import axios
+import axios from 'axios';
 
 const CreatePost = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [coverImage, setCoverImage] = useState(null); // Allow null for no image selected
+  const [coverImage, setCoverImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   
-  // Handle image change (to set cover image)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -18,7 +17,6 @@ const CreatePost = () => {
     }
   };
 
-  // Handle form submission
   const onSubmit = async (data) => {
     setIsSubmitting(true);
 
@@ -29,36 +27,35 @@ const CreatePost = () => {
         return;
       }
 
-      // Prepare the post data
+      // Prepare the form data
       const formData = new FormData();
       formData.append('title', data.title);
       formData.append('category', data.category);
       formData.append('content', data.content);
-      if (coverImage) formData.append('coverImage', coverImage);
+      if (coverImage) formData.append('coverImage', coverImage); // Add image if exists
 
-      // Send the post request with the token in the headers
+      // Send the POST request to create a new post
       const response = await axios.post('http://localhost:5000/api/posts', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`, // Add token to Authorization header
-          'Content-Type': 'multipart/form-data', // Necessary for file uploads
+          'Authorization': `Bearer ${token}`, // Add token in headers for authorization
+          'Content-Type': 'multipart/form-data', // Specify multipart/form-data for file uploads
         },
       });
 
       console.log('Post created successfully:', response.data);
-      navigate('/dashboard'); // Redirect to dashboard or other page
+      navigate('/dashboard'); // Redirect to the dashboard or another page
     } catch (error) {
       console.error('Error creating post:', error);
       alert('Failed to create post. Please try again!');
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Reset submitting state
     }
   };
   
-  
   const removeCoverImage = () => {
-    setCoverImage('');
+    setCoverImage(null);
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -82,9 +79,7 @@ const CreatePost = () => {
                   message: 'Title must be at least 5 characters'
                 }
               })}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${
-                errors.title ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${errors.title ? 'border-red-500 dark:border-red-500' : 'border-gray-300'}`}
               placeholder="Enter a compelling title"
             />
             {errors.title && (
@@ -100,9 +95,7 @@ const CreatePost = () => {
             <select
               id="category"
               {...register('category', { required: 'Category is required' })}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${
-                errors.category ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${errors.category ? 'border-red-500 dark:border-red-500' : 'border-gray-300'}`}
             >
               <option value="">Select a category</option>
               <option value="Technology">Technology</option>
@@ -127,7 +120,7 @@ const CreatePost = () => {
             {coverImage ? (
               <div className="relative">
                 <img 
-                  src={coverImage} 
+                  src={URL.createObjectURL(coverImage)} 
                   alt="Cover" 
                   className="w-full h-64 object-cover rounded-md"
                 />
@@ -180,9 +173,7 @@ const CreatePost = () => {
                 }
               })}
               rows={15}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${
-                errors.content ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${errors.content ? 'border-red-500 dark:border-red-500' : 'border-gray-300'}`}
               placeholder="Write your post content here... (Markdown is supported)"
             ></textarea>
             {errors.content && (

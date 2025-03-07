@@ -1,12 +1,10 @@
 // routes/categoryRoutes.js
+
 const express = require('express');
 const router = express.Router();
-const { createCategory, getCategories, updateCategory, deleteCategory } = require('../controllers/categoryController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { getCategories } = require('../controllers/categoryController');
 
-router.post('/', authMiddleware, createCategory);
-router.get('/', getCategories);
-router.put('/:id', authMiddleware, updateCategory);
-router.delete('/:id', authMiddleware, deleteCategory);
+// Route to get all categories
+router.get('/api/categories', getCategories);
 
 module.exports = router;
