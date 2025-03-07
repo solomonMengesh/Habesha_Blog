@@ -1,13 +1,28 @@
 // controllers/categoryController.js
+const Post = require('../models/Post');
 
-const getCategories = (req, res) => {
-  const categories = [
-    { name: 'Technology', slug: 'technology', count: 42, icon: 'Laptop', color: 'bg-blue-100 text-blue-600' },
-    { name: 'Travel', slug: 'travel', count: 35, icon: 'Plane', color: 'bg-green-100 text-green-600' },
-    // Add more categories here...
-  ];
-  
-  res.json(categories);
+const getCategoryPostCounts = async (req, res) => {
+  try {
+    const categories = [
+      'technology', 'travel', 'lifestyle', 'photography', 
+      'education', 'business', 'health', 'entertainment'
+    ];
+
+    const postCounts = {};
+    
+    // Fetch post count for each category
+    for (let category of categories) {
+      const count = await Post.countDocuments({ category });
+      postCounts[category] = count;
+    }
+
+    res.json(postCounts);
+  } catch (err) {
+    console.error("Error fetching post counts:", err);
+    res.status(500).json({ error: "Failed to fetch post counts" });
+  }
 };
 
-module.exports = { getCategories };
+module.exports = {
+  getCategoryPostCounts
+};
