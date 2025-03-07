@@ -13,9 +13,10 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  image: {
-     type: String
-     },
+  coverImage: {
+    type: String,
+    default: null  // No image uploaded by default
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

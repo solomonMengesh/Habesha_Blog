@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { createPost, getAllPosts, getSinglePost, updatePost, deletePost } = require('../controllers/postController');
 const authMiddleware = require('../middleware/authMiddleware');
-const upload = require("../utils/fileUploader");
+const upload = require("../utils/fileUploader"); // Upload handler
 
 // Create Post (Protected Route)
 router.post('/', authMiddleware, upload , createPost);

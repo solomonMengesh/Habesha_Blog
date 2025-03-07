@@ -6,42 +6,54 @@ import axios from 'axios';  // Add this line to import axios
 
 const CreatePost = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [coverImage, setCoverImage] = useState('');
+  const [coverImage, setCoverImage] = useState(null); // Allow null for no image selected
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   
+  // Handle image change (to set cover image)
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverImage(file);
+    }
+  };
+
+  // Handle form submission
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    
+
     try {
-      // Prepare the data to send to the backend
-      const postData = { 
-        title: data.title, 
-        category: data.category, 
-        content: data.content, 
-        coverImage 
-      };
+      const token = localStorage.getItem('token'); // Get the token from localStorage
+      if (!token) {
+        alert('Token not found. Please login again.');
+        return;
+      }
 
-      // Make the API call to create the post
-      const response = await axios.post('http://localhost:5000/api/posts', postData);
+      // Prepare the post data
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('category', data.category);
+      formData.append('content', data.content);
+      if (coverImage) formData.append('coverImage', coverImage);
 
-      // If the request is successful, handle the response here
+      // Send the post request with the token in the headers
+      const response = await axios.post('http://localhost:5000/api/posts', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`, // Add token to Authorization header
+          'Content-Type': 'multipart/form-data', // Necessary for file uploads
+        },
+      });
+
       console.log('Post created successfully:', response.data);
-
-      // Redirect to dashboard after successful creation
-      navigate('/dashboard');
+      navigate('/dashboard'); // Redirect to dashboard or other page
     } catch (error) {
       console.error('Error creating post:', error);
-      // Handle the error here (e.g., show an error message)
+      alert('Failed to create post. Please try again!');
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const handleImageChange = (e) => {
-    // In a real app, this would upload the image to your server or cloud storage
-    setCoverImage('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1172&q=80');
-  };
+  
   
   const removeCoverImage = () => {
     setCoverImage('');
