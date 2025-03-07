@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Lock, Image } from 'lucide-react';
+import axios from "axios";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -16,32 +17,100 @@ const Profile = () => {
   const [avatar, setAvatar] = useState('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  
+  const [username, setUsername] = useState(user.username); // Added state for username
+  const [email, setEmail] = useState(user.email);
+  const [password, setPassword] = useState("");
+  const [success, setSuccess] = useState("");
+  const [file, setFile] = useState(null); // State for the file input
   const newPassword = watch('newPassword');
-  
-  const onSubmit = async (data) => {
-    setIsSubmitting(true);
+  const [profilePic, setProfilePic] = useState(user.profilePic || avatar);
+
+
+  // const handleProfilePicChange = (e) => {
+  //   const selectedFile = e.target.files[0];
+  //   if (selectedFile) {
+  //     setFile(selectedFile); // Set the selected file for upload
+  //     setProfilePic(URL.createObjectURL(selectedFile)); // Preview the selected image
+  //   }
+  // };
+
+
+  // const onSubmit = async (data) => {
+  //   setIsSubmitting(true);
     
-    try {
-      // Simulate API call to update profile
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  //   try {
+  //     // Simulate API call to update profile
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In a real app, this would send the data to your backend
-      console.log('Profile data:', { ...data, avatar });
+  //     // In a real app, this would send the data to your backend
+  //     console.log('Profile data:', { ...data, avatar });
       
-      // Show success message or notification
-      alert('Profile updated successfully!');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-    } finally {
-      setIsSubmitting(false);
+  //     // Show success message or notification
+  //     alert('Profile updated successfully!');
+  //   } catch (error) {
+  //     console.error('Error updating profile:', error);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+
+
+  
+  const handleAvatarChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      // Ensure only image files are selected
+      if (selectedFile.type.startsWith('image/')) {
+        setProfilePic(URL.createObjectURL(selectedFile)); // Preview image
+        setFile(selectedFile); // Store file for upload
+      } else {
+        alert('Please select a valid image file (PNG, JPG, JPEG, etc.)');
+      }
     }
   };
   
-  const handleAvatarChange = (e) => {
-    // In a real app, this would upload the image to your server or cloud storage
-    // For this demo, we'll just use a placeholder image
-    setAvatar('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80');
+  
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+  
+    if (!user || !user._id) {
+      console.error("User ID is undefined. Ensure user is authenticated.");
+      setSuccess("User data is missing. Please log in again.");
+      setIsSubmitting(false);
+      return;
+    }
+  
+    const updatedUser = {
+      userId: user._id,
+      username: data.username,
+      email: data.email,
+      password: password,
+    };
+  
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      try {
+        const uploadRes = await axios.post("http://localhost:5000/upload", formData);
+        updatedUser.profilePic = uploadRes.data.url;
+      } catch (err) {
+        console.error("File upload error:", err);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+  
+    try {
+      await axios.put(`http://localhost:5000/users/${user._id}`, updatedUser);
+      setSuccess("Profile updated successfully!");
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setSuccess("Error updating profile");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -123,6 +192,7 @@ const Profile = () => {
                     <input
                       id="username"
                       type="text"
+                      
                       {...register('username', { 
                         required: 'Username is required',
                         minLength: {
@@ -130,6 +200,8 @@ const Profile = () => {
                           message: 'Username must be at least 3 characters'
                         }
                       })}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       className={`w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
                         errors.username ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
                       }`}
@@ -159,6 +231,8 @@ const Profile = () => {
                           message: 'Please enter a valid email address'
                         }
                       })}
+                      value={email}
+            onChange={(e) => setEmail(e.target.value)}
                       className={`w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
                         errors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
                       }`}
