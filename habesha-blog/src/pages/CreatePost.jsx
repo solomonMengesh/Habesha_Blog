@@ -97,7 +97,7 @@ const CreatePost = () => {
               {...register('category', { required: 'Category is required' })}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white ${errors.category ? 'border-red-500 dark:border-red-500' : 'border-gray-300'}`}
             >
-              <option value="">Select a category</option>
+             <option value="">Select a category</option>
               <option value="Technology">Technology</option>
               <option value="Travel">Travel</option>
               <option value="Lifestyle">Lifestyle</option>
@@ -106,6 +106,8 @@ const CreatePost = () => {
               <option value="Photography">Photography</option>
               <option value="Health">Health</option>
               <option value="Education">Education</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="other">other</option>
             </select>
             {errors.category && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.category.message}</p>

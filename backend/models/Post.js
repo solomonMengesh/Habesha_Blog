@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Define schema
 const postSchema = mongoose.Schema({
   title: {
     type: String,
@@ -25,6 +26,7 @@ const postSchema = mongoose.Schema({
   timestamps: true,
 });
 
-const Post = mongoose.model('Post', postSchema);
+// Check if the model is already compiled
+const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
 module.exports = Post;

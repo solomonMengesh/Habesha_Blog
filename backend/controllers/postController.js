@@ -1,5 +1,5 @@
 const Post = require('../models/Post'); // Make sure the path is correct
-
+const CategoryCount = require('../models/CategoryCount');
 // Create a new post with an optional cover image
 exports.createPost = async (req, res) => {
   try {
@@ -17,6 +17,12 @@ exports.createPost = async (req, res) => {
     });
 
     await newPost.save();
+    // Update the category count
+    await CategoryCount.findOneAndUpdate(
+      { category: category },
+      { $inc: { count: 1 } }, // Increment count by 1
+      { upsert: true } // If category doesn't exist, create it
+    );
     res.status(201).json({ message: 'Post created successfully', post: newPost });
   } catch (err) {
     console.error(err);
@@ -82,6 +88,12 @@ exports.deletePost = async (req, res) => {
 
     // Delete the post
     await Post.deleteOne({ _id: req.params.id });
+
+    await CategoryCount.findOneAndUpdate(
+      { category: post.category },
+      { $inc: { count: -1 } } // Decrement count by 1
+    );
+
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error(error);

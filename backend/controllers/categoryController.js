@@ -1,28 +1,43 @@
-// controllers/categoryController.js
-const Post = require('../models/Post');
+const Category = require('../models/Category');
 
-const getCategoryPostCounts = async (req, res) => {
+// Get all categories
+exports.getCategories = async (req, res) => {
   try {
-    const categories = [
-      'technology', 'travel', 'lifestyle', 'photography', 
-      'education', 'business', 'health', 'entertainment'
-    ];
-
-    const postCounts = {};
-    
-    // Fetch post count for each category
-    for (let category of categories) {
-      const count = await Post.countDocuments({ category });
-      postCounts[category] = count;
-    }
-
-    res.json(postCounts);
-  } catch (err) {
-    console.error("Error fetching post counts:", err);
-    res.status(500).json({ error: "Failed to fetch post counts" });
+    const categories = await Category.find();
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
   }
 };
 
-module.exports = {
-  getCategoryPostCounts
+// Create a new category
+exports.createCategory = async (req, res) => {
+  try {
+    const { name, slug } = req.body;
+    const categoryExists = await Category.findOne({ slug });
+
+    if (categoryExists) {
+      return res.status(400).json({ message: 'Category already exists' });
+    }
+
+    const category = new Category({ name, slug });
+    await category.save();
+    res.status(201).json(category);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// Delete a category
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
