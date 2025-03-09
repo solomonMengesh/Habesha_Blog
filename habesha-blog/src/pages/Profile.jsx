@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useContext } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Lock, Image } from 'lucide-react';
@@ -25,38 +27,6 @@ const Profile = () => {
   const newPassword = watch('newPassword');
   const [profilePic, setProfilePic] = useState(user.profilePic || avatar);
 
-
-  // const handleProfilePicChange = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (selectedFile) {
-  //     setFile(selectedFile); // Set the selected file for upload
-  //     setProfilePic(URL.createObjectURL(selectedFile)); // Preview the selected image
-  //   }
-  // };
-
-
-  // const onSubmit = async (data) => {
-  //   setIsSubmitting(true);
-    
-  //   try {
-  //     // Simulate API call to update profile
-  //     await new Promise(resolve => setTimeout(resolve, 1000));
-      
-  //     // In a real app, this would send the data to your backend
-  //     console.log('Profile data:', { ...data, avatar });
-      
-  //     // Show success message or notification
-  //     alert('Profile updated successfully!');
-  //   } catch (error) {
-  //     console.error('Error updating profile:', error);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
-
-
-  
   const handleAvatarChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -69,29 +39,28 @@ const Profile = () => {
       }
     }
   };
-  
-  
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-  
+
     if (!user || !user._id) {
       console.error("User ID is undefined. Ensure user is authenticated.");
       setSuccess("User data is missing. Please log in again.");
       setIsSubmitting(false);
       return;
     }
-  
+
     const updatedUser = {
       userId: user._id,
       username: data.username,
       email: data.email,
       password: password,
     };
-  
+
     if (file) {
       const formData = new FormData();
       formData.append("file", file);
-  
+
       try {
         const uploadRes = await axios.post("http://localhost:5000/upload", formData);
         updatedUser.profilePic = uploadRes.data.url;
@@ -101,9 +70,9 @@ const Profile = () => {
         return;
       }
     }
-  
+
     try {
-      await axios.put(`http://localhost:5000/users/${user._id}`, updatedUser);
+      await axios.put(`http://localhost:5000/users/profile/${user._id}`, updatedUser);
       setSuccess("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -112,7 +81,7 @@ const Profile = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -151,7 +120,7 @@ const Profile = () => {
                 <div className="flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
                   <div className="relative">
                     <img 
-                      src={avatar} 
+                      src={profilePic} 
                       alt="Profile" 
                       className="w-24 h-24 rounded-full object-cover"
                     />
@@ -192,7 +161,6 @@ const Profile = () => {
                     <input
                       id="username"
                       type="text"
-                      
                       {...register('username', { 
                         required: 'Username is required',
                         minLength: {
@@ -232,7 +200,7 @@ const Profile = () => {
                         }
                       })}
                       value={email}
-            onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                       className={`w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
                         errors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
                       }`}
@@ -251,103 +219,87 @@ const Profile = () => {
                   <textarea
                     id="bio"
                     {...register('bio')}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="Tell us about yourself"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   ></textarea>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Brief description for your profile. URLs are hyperlinked.
-                  </p>
                 </div>
               </div>
             )}
-            
+
+            {/* Password Change Tab */}
             {activeTab === 'password' && (
               <div className="space-y-6">
-                {/* Current Password */}
                 <div>
                   <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Current Password
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="currentPassword"
-                      type="password"
-                      {...register('currentPassword', { required: 'Current password is required' })}
-                      className={`w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                        errors.currentPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                      }`}
-                    />
-                  </div>
+                  <input
+                    id="currentPassword"
+                    type="password"
+                    {...register('currentPassword', { required: 'Current password is required' })}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                      errors.currentPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                    }`}
+                  />
                   {errors.currentPassword && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.currentPassword.message}</p>
                   )}
                 </div>
-                
-                {/* New Password */}
+
                 <div>
                   <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     New Password
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="newPassword"
-                      type="password"
-                      {...register('newPassword', { required: 'New password is required' })}
-                      className={`w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                        errors.newPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                      }`}
-                    />
-                  </div>
+                  <input
+                    id="newPassword"
+                    type="password"
+                    {...register('newPassword', { 
+                      required: 'New password is required',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters'
+                      }
+                    })}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                      errors.newPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                    }`}
+                  />
                   {errors.newPassword && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.newPassword.message}</p>
                   )}
                 </div>
-                
-                {/* Confirm New Password */}
+
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Confirm New Password
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="confirmPassword"
-                      type="password"
-                      {...register('confirmPassword', {
-                        validate: value =>
-                          value === newPassword || 'Passwords do not match'
-                      })}
-                      className={`w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                        errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                      }`}
-                    />
-                  </div>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    {...register('confirmPassword', { 
+                      validate: (value) => value === newPassword || "Passwords do not match"
+                    })}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                      errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                    }`}
+                  />
                   {errors.confirmPassword && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword.message}</p>
                   )}
                 </div>
               </div>
             )}
-
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className={`inline-flex justify-center items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white ${
-                  isSubmitting ? 'bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-700'
-                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+            
+            <div className="mt-6 flex justify-between">
+              <button 
+                type="submit" 
+                className={`px-4 py-2 bg-indigo-600 text-white rounded-md ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? 'Updating...' : 'Save Changes'}
               </button>
+              {success && (
+                <div className="text-sm text-green-600 dark:text-green-400">{success}</div>
+              )}
             </div>
           </form>
         </div>

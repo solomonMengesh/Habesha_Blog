@@ -14,18 +14,13 @@ import EditPost from './pages/EditPost';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import CategoryPage from './pages/CategoryPage';
-import Contact from './pages/ContactPage';  // Import Contact page
-import About from './pages/AboutPage';      // Import About page
+import Contact from './pages/ContactPage';
+import About from './pages/AboutPage';
 
-// Protected route component
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -42,8 +37,11 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/category/:category" element={<CategoryPage />} />
-                <Route path="/about" element={<About />} /> {/* Added About Page */}
-                <Route path="/contact" element={<Contact />} /> {/* Added Contact Page */}
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="*" element={<NotFound />} />
+                
+                {/* Protected Routes */}
                 <Route 
                   path="/dashboard" 
                   element={
@@ -76,7 +74,6 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
-                <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
             <Footer />

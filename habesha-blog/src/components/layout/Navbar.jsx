@@ -9,6 +9,7 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  console.log("Navbar User Data:", user); // Debugging
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

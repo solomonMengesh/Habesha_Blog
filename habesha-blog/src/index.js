@@ -1,11 +1,17 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import App from './App';
-import './index.css';
-import { AuthProvider } from "./contexts/AuthContext";
+import './index.css'
+import { AuthProvider } from './contexts/AuthContext'; 
+import { ThemeProvider } from './contexts/ThemeContext'; 
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <AuthProvider> {/* 👈 Make sure it's wrapping the whole app */}
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </AuthProvider>
 );
+
+ 
