@@ -1,5 +1,5 @@
 const Category = require('../models/Category');
- 
+
 // Get all categories
 exports.getCategories = async (req, res) => {
   try {
@@ -37,7 +37,7 @@ exports.getPostsByCategory = async (req, res) => {
       filter.category = req.query.category; // Make sure category matches DB schema
     }
 
-    const posts = await Post.find(filter).populate('category'); // ✅ Populate category if needed
+    const posts = await Post.find(filter).populate('category').populate('user', 'username'); // ✅ Populate category if needed
     res.status(200).json(posts);
   } catch (error) {
     console.error('Error fetching posts:', error);

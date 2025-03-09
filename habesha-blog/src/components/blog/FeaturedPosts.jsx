@@ -11,7 +11,10 @@ const FeaturedPosts = () => {
     const fetchPosts = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/posts'); // Replace with your API URL
+
         setPosts(response.data);
+        console.log(response.data)
+
         setLoading(false);
       } catch (error) {
         setError('Failed to fetch posts');

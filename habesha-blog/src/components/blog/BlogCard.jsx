@@ -13,10 +13,10 @@ const BlogCard = ({ post, featured = false }) => {
   const handleImageError = () => setImgError(true); // Fallback to default image on error
 
   // Default image URL for missing or broken post images
-  const defaultImage = '/default-image.jpg';
+  const defaultImage = 'http://localhost:5000/uploads/default-image.jpg';
 
   const coverImage = imgError || !post.coverImage ? defaultImage : post.coverImage;
-
+  console.log(post)
   if (!post) {
     return <div>Error: No post data available.</div>;
   }
@@ -47,13 +47,14 @@ const BlogCard = ({ post, featured = false }) => {
             <p className="mb-4 text-gray-200 line-clamp-2">{post.content.slice(0, 100) || 'No excerpt available'}</p>
             <div className="flex items-center">
               <img 
-                src={post.user?.avatar || '/default-avatar.jpg'} 
+                src={post.user?.avatar || 'http://localhost:5000/uploads/default-image.jpg'} 
                 alt={post.user?.username || 'Unknown Author'} 
                 
                 className="w-10 h-10 rounded-full mr-3"
               />
               <div>
                 <p className="font-medium">{post.user?.username || 'Unknown Author'}</p>
+              
                 <p className="text-sm text-gray-300">{timeAgo}</p>
               </div>
             </div>
@@ -94,7 +95,10 @@ const BlogCard = ({ post, featured = false }) => {
               className="w-8 h-8 rounded-full mr-2"
             />
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{post.user?.username || 'Unknown Author'}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {post?.user?.username || post?.author?.username || 'Unknown Author'}
+            </p>
+           
               <p className="text-xs text-gray-500 dark:text-gray-400">{timeAgo}</p>
             </div>
           </div>
