@@ -1,76 +1,101 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  Laptop, 
-  Plane, 
-  Coffee, 
-  Camera, 
-  BookOpen, 
-  Briefcase, 
-  Heart, 
-  Music 
-} from 'lucide-react';
-
-const categories = [
-  { 
-    name: 'Technology', 
-    slug: 'technology', 
-    count: 42, 
-    icon: <Laptop className="h-6 w-6" />,
-    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-  },
-  { 
-    name: 'Travel', 
-    slug: 'travel', 
-    count: 35, 
-    icon: <Plane className="h-6 w-6" />,
-    color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-  },
-  { 
-    name: 'Lifestyle', 
-    slug: 'lifestyle', 
-    count: 28, 
-    icon: <Coffee className="h-6 w-6" />,
-    color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-  },
-  { 
-    name: 'Photography', 
-    slug: 'photography', 
-    count: 21, 
-    icon: <Camera className="h-6 w-6" />,
-    color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
-  },
-  { 
-    name: 'Education', 
-    slug: 'education', 
-    count: 19, 
-    icon: <BookOpen className="h-6 w-6" />,
-    color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-  },
-  { 
-    name: 'Business', 
-    slug: 'business', 
-    count: 16, 
-    icon: <Briefcase className="h-6 w-6" />,
-    color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-  },
-  { 
-    name: 'Health', 
-    slug: 'health', 
-    count: 14, 
-    icon: <Heart className="h-6 w-6" />,
-    color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400'
-  },
-  { 
-    name: 'Entertainment', 
-    slug: 'entertainment', 
-    count: 12, 
-    icon: <Music className="h-6 w-6" />,
-    color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
-  },
-];
+  faLaptop, 
+  faPlane, 
+  faCoffee, 
+  faCamera, 
+  faBookOpen, 
+  faBriefcase, 
+  faHeart, 
+  faMusic ,
+  faCog     
+} from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const CategoryList = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    // Fetch the categories from the API
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/categories/count/');
+        const categoryData = response.data;
+
+        // Map the category data to your categories format
+        const mappedCategories = categoryData.map((category) => ({
+          name: category.category,
+          slug: category.category.toLowerCase(),
+          count: category.count,
+          icon: getCategoryIcon(category.category),
+          color: getCategoryColor(category.category),
+        }));
+
+        setCategories(mappedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Function to get the category icon based on the category name
+  const getCategoryIcon = (categoryName) => {
+    switch (categoryName) {
+      case 'Technology':
+        return <FontAwesomeIcon icon={faLaptop} className="h-6 w-6" />;
+      case 'Travel':
+        return <FontAwesomeIcon icon={faPlane} className="h-6 w-6" />;
+      case 'Lifestyle':
+        return <FontAwesomeIcon icon={faCoffee} className="h-6 w-6" />;
+      case 'Photography':
+        return <FontAwesomeIcon icon={faCamera} className="h-6 w-6" />;
+      case 'Education':
+        return <FontAwesomeIcon icon={faBookOpen} className="h-6 w-6" />;
+      case 'Business':
+        return <FontAwesomeIcon icon={faBriefcase} className="h-6 w-6" />;
+      case 'Health':
+        return <FontAwesomeIcon icon={faHeart} className="h-6 w-6" />;
+      case 'Entertainment':
+        return <FontAwesomeIcon icon={faMusic} className="h-6 w-6" />;
+        case 'other':
+          return <FontAwesomeIcon icon={faCog} className="h-6 w-6" />;
+
+      default:
+        return null;
+    }
+  };
+
+  // Function to get the category color based on the category name
+  const getCategoryColor = (categoryName) => {
+    switch (categoryName) {
+      case 'Technology':
+        return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'Travel':
+        return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
+      case 'Lifestyle':
+        return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'Photography':
+        return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'Education':
+        return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400';
+      case 'Business':
+        return 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400';
+      case 'Health':
+        return 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400';
+      case 'Entertainment':
+        return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400';
+        case 'other':
+  return 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400';
+
+      default:
+        return 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
   return (
     <section className="py-10 bg-gray-50 dark:bg-gray-900/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

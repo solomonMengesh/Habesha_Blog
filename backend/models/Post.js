@@ -1,31 +1,32 @@
 const mongoose = require('mongoose');
 
-const postSchema = new mongoose.Schema({
+// Define schema
+const postSchema = mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   content: {
     type: String,
-    required: true
+    required: true,
   },
   category: {
     type: String,
-    required: true
+    required: true,
   },
   coverImage: {
     type: String,
-    default: null  // No image uploaded by default
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
+    ref: 'User', // Reference to the user model
+    required: true,
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
-const Post = mongoose.model('Post', postSchema);
+// Check if the model is already compiled
+const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
 module.exports = Post;

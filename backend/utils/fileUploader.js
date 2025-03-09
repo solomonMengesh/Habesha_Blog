@@ -4,7 +4,7 @@ const path = require("path");
 // Set up storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads/");  // Folder to save the uploaded files
+    cb(null, path.resolve(__dirname, "../uploads/"));  // Ensure absolute path
   },
   filename: (req, file, cb) => {
     // Prevent overwriting files with the same name by adding a timestamp
@@ -12,21 +12,28 @@ const storage = multer.diskStorage({
   },
 });
 
+// File filter function
+const fileFilter = (req, file, cb) => {
+  const allowedMimes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only JPG, PNG, GIF, PDF, and DOCX files are allowed"));
+  }
+};
+
 // Initialize multer with storage configuration
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Max file size: 5MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpg|jpeg|png|gif|pdf|docx/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      return cb(new Error("Only image, pdf, and doc files are allowed"));
-    }
-  },
-}).single("image"); // The field name 'image' for the file in the form
+  fileFilter,
+}).single("image");  // The field name 'image' for the file in the form
 
 module.exports = upload;

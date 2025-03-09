@@ -1,140 +1,128 @@
-const Post = require('../models/Post'); // Assuming you have a Post model for MongoDB
-const multer = require('multer');
-const path = require('path');
-const jwt = require('jsonwebtoken');
-
-// Set up multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Uploads folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // File name with timestamp
-  }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
-});
-
-// Middleware to check authorization
-const authenticateJWT = (req, res, next) => {
-  const token = req.header('Authorization')?.split(' ')[1]; // Get token from the header
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
-    req.user = user; // Attach user to the request object
-    next();
-  });
-};
-
-// Create a new post
-exports.createPost = [
-  authenticateJWT,
-  upload.single('coverImage'), // Handle the file upload
-  async (req, res) => {
-    const { title, category, content } = req.body;
-    const userId = req.user.id; // Get the user ID from the JWT payload
-    const coverImage = req.file ? req.file.path : null; // Save image path or null if no file uploaded
-
-    try {
-      // Create a new post object
-      const newPost = new Post({
-        title,
-        category,
-        content,
-        coverImage,
-        user: userId, // Link the post with the user who created it
-      });
-
-      // Save the post to the database
-      const savedPost = await newPost.save();
-      res.status(201).json(savedPost); // Respond with the created post
-    } catch (error) {
-      console.error('Error creating post:', error);
-      res.status(500).json({ message: 'Error creating post. Please try again later.' });
-    }
-  }
-];
+const Post = require('../models/Post'); // Make sure the path is correct
+const CategoryCount = require('../models/CategoryCount');
 
 
-  // Get All Posts
-
-exports.getAllPosts = async (req, res) => {
-    try {
-      const posts = await Post.find().populate('user', 'username'); // Populating user field to show username
-      res.json(posts);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  };
-  // Get Single Post
-
-exports.getSinglePost = async (req, res) => {
-    try {
-      const post = await Post.findById(req.params.id).populate('user', 'username');
-      if (!post) {
-        return res.status(404).json({ message: 'Post not found' });
-      }
-      res.json(post);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  };
-  
-
-  // Update Post
-
-
-exports.updatePost = async (req, res) => {
+// Create a new post with an optional cover image
+exports.createPost = async (req, res) => {
+  try {
     const { title, content, category } = req.body;
-  
-    try {
-      const post = await Post.findById(req.params.id);
-      if (!post) {
-        return res.status(404).json({ message: 'Post not found' });
-      }
-  
-      post.title = title || post.title;
-      post.content = content || post.content;
-      post.category = category || post.category;
-  
-      await post.save();
-      res.json(post);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  };
-  
+    const userId = req.user._id;
+    const coverImage = req.file ? req.file.path : null;
 
-  //  Delete Post
-  exports.deletePost = async (req, res) => {
-    try {
-        // Validate if the provided ID is a valid MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: 'Invalid post ID' });
-        }
+    // Create a new post
+    const newPost = new Post({
+      title,
+      content,
+      category,
+      coverImage: req.file ? req.file.path : null, // Store the file path if a cover image is uploaded
+      user: userId, // Link the post to the user
+    });
 
-        // Find the post by ID
-        const post = await Post.findById(req.params.id);
-        if (!post) {
-            return res.status(404).json({ message: 'Post not found' });
-        }
-
-        // Delete the post
-        await Post.deleteOne({ _id: req.params.id });
-
-        res.json({ message: 'Post deleted successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
+    await newPost.save();
+    // Update the category count
+    await CategoryCount.findOneAndUpdate(
+      { category: category },
+      { $inc: { count: 1 } }, // Increment count by 1
+      { upsert: true } // If category doesn't exist, create it
+    );
+    res.status(201).json({ message: 'Post created successfully', post: newPost });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to create post', error: err.message });
+  }
 };
+
+// Get all posts
+exports.getAllPosts = async (req, res) => {
+  try {
+    // Fetch all posts and populate the 'user' field with 'username'
+    const posts = await Post.find().populate('user', 'username');
+    res.json(posts); // Send posts as JSON response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' }); // Handle any errors that occur
+  }
+}
+
+// Get a single post
+exports.getSinglePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate('user', 'username');
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    res.json(post);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update a post
+exports.updatePost = async (req, res) => {
+  const { title, content, category } = req.body;
+
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    post.title = title || post.title;
+    post.content = content || post.content;
+    post.category = category || post.category;
+
+    await post.save();
+    res.json(post);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Delete a post
+exports.deletePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Delete the post
+    await Post.deleteOne({ _id: req.params.id });
+
+    await CategoryCount.findOneAndUpdate(
+      { category: post.category },
+      { $inc: { count: -1 } } // Decrement count by 1
+    );
+
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+// Get posts by category
+exports.getPostsByCategory = async (req, res) => {
+  try {
+    const categorySlug = req.params.slug;
+
+    // Perform a case-insensitive query for posts by category
+    const posts = await Post.find({ category: { $regex: new RegExp(`^${categorySlug}$`, 'i') } });
+
+    if (posts.length === 0) {
+      return res.status(404).json({ message: 'No posts found for this category' });
+    }
+
+    res.status(200).json(posts); // Return posts for the category
+  } catch (error) {
+    console.error('Error fetching posts by category:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+
+

@@ -3,34 +3,35 @@ import { useParams, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import { Heart, MessageCircle, Bookmark, Share2, ChevronLeft } from 'lucide-react';
-import { mockPosts } from '../data/mockData';
+import axios from 'axios';
 
 const BlogPost = () => {
-  const { slug } = useParams();
+  const { slug } = useParams();  // Slug is used for post identification
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
-  
+
   useEffect(() => {
-    // Simulate API call to fetch post by slug
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      const foundPost = mockPosts.find(p => p.slug === slug);
-      
-      if (foundPost) {
-        setPost(foundPost);
+    const fetchPost = async () => {
+      try {
+        setIsLoading(true);
+        // Fix the API endpoint by correctly appending the slug (post ID)
+        const response = await axios.get(`http://localhost:5000/api/posts/${slug}`);
+        setPost(response.data);
+        console.log(response.data)
         setError('');
-      } else {
+      } catch (err) {
         setError('Post not found');
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    }, 500);
-  }, [slug]);
-  
+    };
+
+    fetchPost();
+  }, [slug]);  // Dependency on slug to refetch when it changes
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
@@ -38,7 +39,7 @@ const BlogPost = () => {
       </div>
     );
   }
-  
+
   if (error || !post) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
@@ -49,67 +50,71 @@ const BlogPost = () => {
       </div>
     );
   }
-  
-  const timeAgo = formatDistanceToNow(new Date(post.publishedAt), { addSuffix: true });
-  
+
+  // Validate and format the publishedAt date
+  const publishedAt = new Date(post.createdAt);
+  const timeAgo = isNaN(publishedAt.getTime()) 
+    ? "Invalid date" 
+    : formatDistanceToNow(publishedAt, { addSuffix: true });
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Back button */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 mb-6"
         >
           <ChevronLeft className="h-5 w-5 mr-1" />
           Back to home
         </Link>
-        
+
         {/* Category */}
-        <Link 
+        <Link
           to={`/category/${post.category.toLowerCase()}`}
           className="inline-block px-3 py-1 mb-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30 rounded-full"
         >
           {post.category}
         </Link>
-        
+
         {/* Title */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
           {post.title}
         </h1>
-        
+
         {/* Author and date */}
-        <div className="flex items-center mb-8">
-          <img 
-            src={post.author.avatar} 
-            alt={post.author.name} 
-            className="w-12 h-12 rounded-full mr-4"
-          />
-          <div>
-            <p className="font-medium text-gray-900 dark:text-white">{post.author.name}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Published {timeAgo} • {Math.ceil(post.content.length / 1000)} min read
-            </p>
-          </div>
-        </div>
-        
+            <div className="flex items-center mb-8">
+                <img
+                  src={post.author?.avatar || 'http://localhost:5000/uploads/default-image.jpg'} // Fallback to placeholder image if avatar is not available
+                  alt={post.author?.name || 'Unknown Author'} // Fallback to 'Unknown Author' if name is not available
+                  className="w-12 h-12 rounded-full mr-4"
+                />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">{post.user?.username || 'Unknown Author'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                   {timeAgo} • {Math.ceil(post.content.length / 500)} min read
+                  </p>
+                </div>
+      </div>
+
+
         {/* Cover image */}
         <div className="mb-8">
-          <img 
-            src={post.coverImage} 
-            alt={post.title} 
-            className="w-full h-auto rounded-lg object-cover"
-          />
+          <img
+             src={`http://localhost:5000/${post.coverImage}`} 
+             alt={post.title}
+             className="w-full h-auto rounded-lg object-cover"          />
         </div>
-        
+
         {/* Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
           <ReactMarkdown>{post.content}</ReactMarkdown>
         </div>
-        
+
         {/* Interaction buttons */}
         <div className="flex items-center justify-between border-t border-b border-gray-200 dark:border-gray-700 py-4 mb-8">
           <div className="flex space-x-6">
-            <button 
+            <button
               onClick={() => setLiked(!liked)}
               className={`flex items-center ${
                 liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-500'
@@ -124,7 +129,7 @@ const BlogPost = () => {
             </button>
           </div>
           <div className="flex space-x-4">
-            <button 
+            <button
               onClick={() => setBookmarked(!bookmarked)}
               className={`flex items-center ${
                 bookmarked ? 'text-yellow-500' : 'text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-500'
@@ -137,11 +142,11 @@ const BlogPost = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Comments section */}
         <div className="mb-12">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Comments ({post.comments})</h3>
-          
+
           {/* Comment form */}
           <div className="mb-8">
             <textarea
@@ -155,14 +160,14 @@ const BlogPost = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Sample comments */}
           <div className="space-y-6">
             <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
               <div className="flex items-start mb-2">
-                <img 
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" 
-                  alt="User" 
+                <img
+                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80"
+                  alt="User"
                   className="w-10 h-10 rounded-full mr-3"
                 />
                 <div>
@@ -174,39 +179,17 @@ const BlogPost = () => {
                     This is such an insightful article! I've been thinking about this topic for a while, and you've articulated many points I hadn't considered before.
                   </p>
                   <div className="mt-2 flex items-center space-x-4">
-                    <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">Reply</button>
-                    <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500">
-                      <Heart className="h-4 w-4 inline mr-1" /> 12
+                    <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-500">
+                      Reply
+                    </button>
+                    <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-500">
+                      Like
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
-              <div className="flex items-start mb-2">
-                <img 
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" 
-                  alt="User" 
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <div>
-                  <div className="flex items-center mb-1">
-                    <h4 className="font-medium text-gray-900 dark:text-white mr-2">Emily Johnson</h4>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">5 days ago</span>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    I disagree with some points here. While the article is well-written, I think there are some practical considerations that have been overlooked.
-                  </p>
-                  <div className="mt-2 flex items-center space-x-4">
-                    <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">Reply</button>
-                    <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500">
-                      <Heart className="h-4 w-4 inline mr-1" /> 8
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Add more comments here */}
           </div>
         </div>
       </div>
