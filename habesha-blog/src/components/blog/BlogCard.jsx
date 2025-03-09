@@ -49,6 +49,7 @@ const BlogCard = ({ post, featured = false }) => {
               <img 
                 src={post.user?.avatar || '/default-avatar.jpg'} 
                 alt={post.user?.username || 'Unknown Author'} 
+                
                 className="w-10 h-10 rounded-full mr-3"
               />
               <div>

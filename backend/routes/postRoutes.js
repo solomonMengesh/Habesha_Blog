@@ -27,5 +27,5 @@ router.get('/', postController.getAllPosts);
 router.get('/posts/:id', postController.getSinglePost);
 router.put('/posts/:id', postController.updatePost);
 router.delete('/posts/:id', postController.deletePost);
-
+router.get('/category/:slug', postController.getPostsByCategory);
 module.exports = router;

@@ -1,5 +1,5 @@
 const Category = require('../models/Category');
-
+ 
 // Get all categories
 exports.getCategories = async (req, res) => {
   try {
@@ -24,6 +24,23 @@ exports.createCategory = async (req, res) => {
     await category.save();
     res.status(201).json(category);
   } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get posts by category
+exports.getPostsByCategory = async (req, res) => {
+  try {
+    let filter = {};
+    
+    if (req.query.category) {
+      filter.category = req.query.category; // Make sure category matches DB schema
+    }
+
+    const posts = await Post.find(filter).populate('category'); // ✅ Populate category if needed
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 };

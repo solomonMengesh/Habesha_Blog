@@ -1,5 +1,7 @@
 const Post = require('../models/Post'); // Make sure the path is correct
 const CategoryCount = require('../models/CategoryCount');
+
+
 // Create a new post with an optional cover image
 exports.createPost = async (req, res) => {
   try {
@@ -100,3 +102,27 @@ exports.deletePost = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
+
+// Get posts by category
+exports.getPostsByCategory = async (req, res) => {
+  try {
+    const categorySlug = req.params.slug;
+
+    // Perform a case-insensitive query for posts by category
+    const posts = await Post.find({ category: { $regex: new RegExp(`^${categorySlug}$`, 'i') } });
+
+    if (posts.length === 0) {
+      return res.status(404).json({ message: 'No posts found for this category' });
+    }
+
+    res.status(200).json(posts); // Return posts for the category
+  } catch (error) {
+    console.error('Error fetching posts by category:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+
+

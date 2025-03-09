@@ -16,7 +16,7 @@ const CategoryPage = () => {
     // Ensure correct API URL
     const apiUrl = category === 'all'
       ? 'http://localhost:5000/api/posts' // Fetch all posts
-      : `http://localhost:5000/api/posts?category=${category}`;
+      : `http://localhost:5000/api/category/${category}`; // Fetch posts by category
 
     axios.get(apiUrl)
       .then(response => {
@@ -50,7 +50,7 @@ const CategoryPage = () => {
         ) : posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map(post => (
-              <BlogCard key={post.id} post={post} />
+              <BlogCard key={post._id} post={post} />
             ))}
           </div>
         ) : (
