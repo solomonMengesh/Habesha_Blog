@@ -68,11 +68,19 @@ const Navbar = () => {
                     className="flex items-center space-x-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
                   >
                     <User className="h-5 w-5" />
-                    <span>{user?.username}</span> {/* Display the username here */}
+                    <span>{user?.username|| "Guest"}</span> {/* Display the username here */}
                   </button>
                   {isProfileMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5">
-                      <Link
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5">
+                    <div className="flex items-center px-4 py-2">
+                      <img
+                        src={user?.profilePic || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"} // Use a default image if none is available
+                        alt="Profile"
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    
+                    </div>
+                    <Link
                         to="/dashboard"
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
@@ -180,7 +188,7 @@ const Navbar = () => {
               <div className="ml-3">
                 {isAuthenticated ? (
                   <>
-                    <div className="text-base font-medium text-gray-800 dark:text-gray-200">{user?.username}</div>
+                    <div className="text-base font-medium text-gray-800 dark:text-gray-200">{user?.username|| "Guest"}</div>
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{user?.email}</div>
                   </>
                 ) : (
@@ -191,6 +199,7 @@ const Navbar = () => {
             <div className="mt-3 space-y-1">
               {isAuthenticated ? (
                 <>
+               
                   <Link
                     to="/dashboard"
                     className="block px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"

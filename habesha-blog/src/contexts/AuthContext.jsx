@@ -39,22 +39,12 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (token) => {
-    localStorage.setItem("token", token);
-    try {
-      const decoded = jwtDecode(token);
-      console.log("Decoded Token on Login:", decoded); // Debugging
-
-      setUser({
-        id: decoded.userId, // Use `userId` instead of `id`
-      });
-      setIsAuthenticated(true);
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      logout();
-    }
+  const login = (userData) => {
+    setUser(userData); // Store user info, including username
+    localStorage.setItem('token', userData.token); // Store token for persistence
+    setIsAuthenticated(true);
   };
-
+  
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
