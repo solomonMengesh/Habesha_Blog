@@ -18,28 +18,31 @@ const LoginForm = () => {
     setLoginError('');
   
     try {
-      // Make the API call to your login endpoint
+      // Make the API call to the login endpoint
       const response = await axios.post('http://localhost:5000/api/auth/login', {
         email: data.email,  
         password: data.password
       });
   
       // Extract the token and user details
-      const { token, user } = response.data;  // Ensure API returns user details
+      const { token, user } = response.data;  // Ensure the API returns user details
   
-      // Call the login function from AuthContext to store user data
+      // Store the token and user details in AuthContext
       login({ token, username: user.username, email: user.email });
   
-      console.log('Logged in successfully');
+      console.log('Logged in successfully:', user.username);
   
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
-      setLoginError('Invalid email or password. Please try again.');
+      console.error("Login Error:", error.response ? error.response.data : error);
+    setLoginError(error.response?.data?.message || 'Invalid email or password. Please try again.');
+
     } finally {
       setIsLoading(false);
     }
   };
+  
   
 
   return (

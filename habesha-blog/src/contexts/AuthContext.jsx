@@ -40,10 +40,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    setUser(userData); // Store user info, including username
-    localStorage.setItem('token', userData.token); // Store token for persistence
+    setUser(userData); // Store user info including username
+    localStorage.setItem('token', userData.token); // Persist token
+    localStorage.setItem('username', userData.username); // Store username for later use
     setIsAuthenticated(true);
   };
+  
+  
   
   const logout = () => {
     localStorage.removeItem("token");

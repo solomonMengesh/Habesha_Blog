@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
+// Generate JWT Token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
@@ -25,7 +26,7 @@ const registerUser = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    res.cookie("authToken", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
+    res.cookie("authToken", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
 
     res.status(201).json({
       token,
@@ -42,23 +43,33 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Find the user by email
+    console.log('Email received:', email); // Debug log for received email
     const user = await User.findOne({ email });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    
+    if (!user) {
+      console.log('No user found with this email:', email); // Debug log if no user is found
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const token = generateToken(user._id);
+    console.log('User found:', user); // Debug log to verify user found
 
-    res.cookie("authToken", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
+    // Check if the password matches
+    const isMatch = await bcrypt.compare(password, user.password); // Use bcrypt.compare directly
+    console.log('Password match result:', isMatch); // Debug log for password match result
 
-    res.json({
-      token,
-      user: { _id: user._id, username: user.username, email: user.email }
-    });
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate a JWT token
+    const token = generateToken(user._id); // Use the same generateToken function
+
+    res.json({ token });
+    
   } catch (error) {
-    console.error("Error logging in:", error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Server Error', error });
   }
 };
 

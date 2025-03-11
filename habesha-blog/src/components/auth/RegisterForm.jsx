@@ -29,10 +29,9 @@ const RegisterForm = () => {
       });
 
       // Assuming the response contains a token
-      const { token } = response.data;
-      
+      const { token, user } = response.data; // Ensure API returns user details      
       // Call the login function from AuthContext
-      login(token);
+      login({ token, username: user.username, email: user.email });
 
       // Redirect to the dashboard after successful registration
       navigate('/dashboard');
