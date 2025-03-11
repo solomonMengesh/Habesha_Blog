@@ -81,7 +81,11 @@ const Profile = () => {
       setIsSubmitting(false);
     }
   };
-
+  const handleRemoveAvatar = () => {
+    setProfilePic(avatar); // Reset to default avatar
+    setFile(null); // Clear selected file
+  };
+  
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -142,6 +146,7 @@ const Profile = () => {
                     </p>
                     <button
                       type="button"
+                      onClick={handleRemoveAvatar}
                       className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Remove
