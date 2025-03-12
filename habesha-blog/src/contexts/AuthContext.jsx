@@ -18,16 +18,21 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        console.log("Decoded Token:", decoded); // Debugging
+        console.log("Decoded Token Data:", decoded); // Debugging
 
         if (decoded.exp < Date.now() / 1000) {
           logout();
         } else {
           setUser({
-            id: decoded.userId, // Use `userId` instead of `id`
+            id: decoded.userId || decoded.id, // Ensure correct ID extraction
+            username: decoded.username,
+            email: decoded.email,
+            profilePic: decoded.profilePic || "",
+            bio: decoded.bio || "",
           });
           setIsAuthenticated(true);
         }
@@ -40,18 +45,26 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    setUser(userData); // Store user info including username
-    localStorage.setItem('token', userData.token); // Persist token
-    localStorage.setItem('username', userData.username); // Store username for later use
+    localStorage.setItem("token", userData.token);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    setUser(userData);
     setIsAuthenticated(true);
   };
-  
-  
-  
+
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     setIsAuthenticated(false);
+  };
+
+  const updateUser = (updatedData) => {
+    setUser((prevUser) => ({
+      ...prevUser,
+      ...updatedData, // Merge new data
+    }));
+    localStorage.setItem("user", JSON.stringify({ ...user, ...updatedData }));
   };
 
   if (loading) {
@@ -59,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

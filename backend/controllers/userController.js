@@ -23,6 +23,7 @@ exports.getUserProfile = async (req, res) => {
 // Update User Profile
 exports.updateUserProfile = async (req, res) => {
   const { username, email, profilePic, bio } = req.body; // Added bio field
+  console.log(req.user);  // Log user details to check if it's populated
 
   try {
     // Find user and update profile
@@ -42,7 +43,7 @@ exports.updateUserProfile = async (req, res) => {
       email: user.email,
       profilePic: user.profilePic,
       bio: user.bio, // Added bio field
-      _id: user._id
+      id: user._id
     });
   } catch (error) {
     console.error(error);
