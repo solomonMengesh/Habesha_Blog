@@ -16,33 +16,46 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     setLoginError('');
-    
+  
     try {
-      setIsLoading(true); // Set loading to true while making the request
-      setLoginError(''); // Clear any previous login error message
-      
-      // Make the API call to your login endpoint
+      // Make the API call to the login endpoint
       const response = await axios.post('http://localhost:5000/api/auth/login', {
         email: data.email,  
         password: data.password
       });
     
-      // Assuming the response contains a JWT token
-      const { token } = response.data;
+      // Extract the token and user details
+      const { token, user } = response.data;  // Ensure the API returns user details
     
-      // Call the login function from AuthContext to store the token
-      login(token);
-    console.log('Logged in successfully');
+      if (token) {
+        // Store token in localStorage
+        localStorage.setItem("authToken", token);
+        
+        // Store user details (optional)
+        localStorage.setItem("user", JSON.stringify(user));
+    
+        console.log('Token stored successfully:', token);
+      } else {
+        console.error("No token received from server");
+      }
+    
+      // Store the token and user details in AuthContext
+      login({ token, username: user.username, email: user.email });
+    
+      console.log('Logged in successfully:', user.username);
+    
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
-      // Handle errors (e.g., invalid credentials, server issues)
-      setLoginError('Invalid email or password. Please try again.');
+      console.error("Login Error:", error.response ? error.response.data : error);
+      setLoginError(error.response?.data?.message || 'Invalid email or password. Please try again.');
     } finally {
-      setIsLoading(false); // Set loading to false after the request
+      setIsLoading(false);
     }
     
   };
+  
+  
 
   return (
     <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md max-w-md w-full">
