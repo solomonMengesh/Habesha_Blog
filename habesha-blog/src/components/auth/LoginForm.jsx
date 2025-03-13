@@ -23,24 +23,36 @@ const LoginForm = () => {
         email: data.email,  
         password: data.password
       });
-  
+    
       // Extract the token and user details
       const { token, user } = response.data;  // Ensure the API returns user details
-  
+    
+      if (token) {
+        // Store token in localStorage
+        localStorage.setItem("authToken", token);
+        
+        // Store user details (optional)
+        localStorage.setItem("user", JSON.stringify(user));
+    
+        console.log('Token stored successfully:', token);
+      } else {
+        console.error("No token received from server");
+      }
+    
       // Store the token and user details in AuthContext
       login({ token, username: user.username, email: user.email });
-  
+    
       console.log('Logged in successfully:', user.username);
-  
+    
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error("Login Error:", error.response ? error.response.data : error);
-    setLoginError(error.response?.data?.message || 'Invalid email or password. Please try again.');
-
+      setLoginError(error.response?.data?.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
+    
   };
   
   

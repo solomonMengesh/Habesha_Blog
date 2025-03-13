@@ -50,7 +50,7 @@ const Profile = () => {
   
       try {
         // Post the image to the backend for uploading
-        const uploadResponse = await axios.post("http://localhost:5000/api/uploads", data); 
+        const uploadResponse = await axios.post("http://localhost:5000/uploads", data); 
         
         // After the upload, use the returned URL for the profile picture
         updatedUser.profilePic = uploadResponse.data.fileUrl;  // Assuming your backend sends back the file URL
@@ -186,6 +186,8 @@ const Profile = () => {
                     className="w-full pl-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
+
+                
               </div>
             )}
 
