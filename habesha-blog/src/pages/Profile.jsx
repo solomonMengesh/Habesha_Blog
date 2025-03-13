@@ -63,10 +63,7 @@ const Profile = () => {
   
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        setError("No authentication token found. Please log in.");
-        return;
-      }
+    
       console.log("Authorization Header:", {
         Authorization: `Bearer ${token}`,
       });
